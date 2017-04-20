@@ -37,3 +37,17 @@ When finished, you're informed in the user-interface on your computer.
 #### !Note:
 In this version the ip-address of your EV3 is hard coded, so you need to 
 change the code in `ksm_pixel_plotter_gui.py` (line 24).
+
+
+# Using Stand alone version
+
+In directory `EV3_stand_alone` you find an older version of ksm_pixel_plotter, 
+which runs on the EV3. You can specify the imagefile through command-line 
+interface, for instanece:
+`python3 ksm_pixel_plotter.py -d -f image.jpg`
+Where:
+`-d-' = run in debug mode: pixeldata is written to file.
+'-f <file> = specifying the image to plot.
+
+Upload imagefiles to a sub-directory `/pics` and create a directory `/files` to
+store the debugfiles.
