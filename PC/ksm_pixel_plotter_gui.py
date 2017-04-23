@@ -2,7 +2,6 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter.filedialog import askopenfilename
 from time import sleep
-#from tkinter import ttk
 import rpyc
 import json
 from PIL import Image
@@ -21,7 +20,8 @@ class KsmPixelPlotterGUI(Frame):
         self.create_widgets()
         # Connect to EV3.
         #TODO: add combobox to select EV3.
-        self.conn = rpyc.connect('192.168.2.64', port=18812)
+        self.conn = rpyc.classic.connect('192.168.2.64')
+        self.conn.modules.sys.path.append('/home/robot')
         # Read settings from file.
         with open('pp_settings.json') as f_obj:
             self.pp_settings = json.load(f_obj)
@@ -136,8 +136,8 @@ class KsmPixelPlotterGUI(Frame):
 
         # Plot image by calling method from service on EV3.
         self.write_status('Plotting started')
-        self.conn.root.plot_file(self.pp_settings, img.size[0], img.size[1],
-                                 pixel_data)
+        ev3 = self.conn.modules.ksm_pixel_plotter_ev3
+        ev3.plot_file(self.pp_settings, img.size[0], img.size[1], pixel_data)
 
         # Plot ready.
         self.write_status('\nPlotting finished')
@@ -160,7 +160,7 @@ class SettingsGUI(Frame):
         self.master = master
         self.master.title('Settings')
         w = 275
-        h=310
+        h = 310
         x, y = center_window(self.master, w, h)
         self.master.geometry('%dx%d+%d+%d' % (w, h, x, y))
         self.master.transient(self)
