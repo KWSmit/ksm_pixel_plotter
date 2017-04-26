@@ -13,7 +13,11 @@ class KsmPixelPlotterGUI(Frame):
         super().__init__()
         self.master
         self.master.title('ksm_pixel_potter')
-        self.master.geometry('570x500')
+        w = 630
+        h = 490
+        x, y = center_window(self.master, w, h)
+        self.master.geometry('%dx%d+%d+%d' % (w, h, x, y))
+        #self.master.geometry('630x490')
         self.master.iconbitmap('KSmEV3.ico')
 
         self.grid()
@@ -53,24 +57,35 @@ class KsmPixelPlotterGUI(Frame):
                                     command=self.btn_open_file_callback)
         self.btn_open_file.grid(row=1, column=2, padx=5, pady=5)
 
+        # Checkbox for image processing only (image will not be plotted)
+        self.chk_test = IntVar()
+        self.lbl_image_processing_only = Label(self.master,
+                                               text='Test image processing')
+        self.lbl_image_processing_only.grid(row=2, column=0,
+                                            padx=5, pady=5, sticky=E)
+        self.chk_image_processing_only = Checkbutton(self.master,
+                                                     variable=self.chk_test)
+        self.chk_image_processing_only.grid(row=2, column=1,
+                                            padx=5, pady=5, sticky=W)
+
         # Start button.
         self.btn_start = Button(self.master,
                                 text='Start plotting',
                                 width=68,
                                 height=2,
                                 command=self.btn_start_callback)
-        self.btn_start.grid(row=2, column=1, pady=5, columnspan=2)
+        self.btn_start.grid(row=3, column=1, pady=5, columnspan=2)
 
         # Information about imageprocessing.
         self.lbl_image_processing = Label(self.master,
                                           text='Processing:',
                                          )
-        self.lbl_image_processing.grid(row=3, column=0,
+        self.lbl_image_processing.grid(row=4, column=0,
                                        padx=5, pady=5, sticky=NE)
         self.txt_image_processing = Text(self.master,
                                          width=60,
                                          height=15)
-        self.txt_image_processing.grid(row=3, column=1, columnspan=2, pady=5)
+        self.txt_image_processing.grid(row=4, column=1, columnspan=2, pady=5)
 
     def show_settings_window(self):
         """Create and open settings window."""
@@ -125,8 +140,12 @@ class KsmPixelPlotterGUI(Frame):
 
     def btn_start_callback(self):
         """Call core function to plot file."""
+        # Clear contents of txt_image_processing.
+        self.txt_image_processing.delete(1.0, END)
+
         # Open imagefile.
-        img = Image.open(self.txt_filename.get(), mode='r')
+        image_file = self.txt_filename.get()
+        img = Image.open(image_file, mode='r')
 
         # Prepare image for plotting.
         img = self.prepare_image(img, self.pp_settings)
@@ -134,13 +153,38 @@ class KsmPixelPlotterGUI(Frame):
         # Load pixel access object to read pixels
         pixel_data = img.load()
 
-        # Plot image by calling method from service on EV3.
-        self.write_status('Plotting started')
-        ev3 = self.conn.modules.ksm_pixel_plotter_ev3
-        ev3.plot_file(self.pp_settings, img.size[0], img.size[1], pixel_data)
+        if self.chk_test.get() == 0:
+            # Plot image om EV3 by calling method from service on EV3.
+            self.write_status('Plotting started')
+            ev3 = self.conn.modules.ksm_pixel_plotter_ev3
+            ev3.plot_file(self.pp_settings, img.size[0],
+                          img.size[1], pixel_data)
+            self.write_status('\nPlotting finished')
+        else:
+            # Plot pixel_data to file.
+            self.plot_pixel_data_to_file(image_file, img.size[0],
+                                         img.size[1], pixel_data)
 
-        # Plot ready.
-        self.write_status('\nPlotting finished')
+    def plot_pixel_data_to_file(self, file_path, size_x, size_y, pixel_data):
+        """Plot pixeldata to file ('XX' = black, '  ' = white pixel)."""
+        # Open file.
+        output_file_name = file_path[0:-3] + 'txt'
+        output_file = open(output_file_name, 'w')
+
+        # Plot pixel_data.
+        for y in range(size_y):
+            str_line = ''
+            for x in range(size_x):
+                if pixel_data[x, y] == 0:
+                    str_line = str_line + 'XX'
+                else:
+                    str_line = str_line + '  '
+            output_file.write(str_line + '\n')
+
+        # Close file.
+        output_file.close()
+
+        self.write_status('\nPixel data written to file.')
 
     def write_status(self, msg):
         """Write proces status to txt_image_processing."""
