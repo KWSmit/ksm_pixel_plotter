@@ -14,7 +14,7 @@ class KsmPixelPlotterGUI(Frame):
         self.master
         self.master.title('ksm_pixel_potter')
         w = 630
-        h = 490
+        h = 520
         x, y = center_window(self.master, w, h)
         self.master.geometry('%dx%d+%d+%d' % (w, h, x, y))
         #self.master.geometry('630x490')
@@ -71,8 +71,7 @@ class KsmPixelPlotterGUI(Frame):
         # Start button.
         self.btn_start = Button(self.master,
                                 text='Start plotting',
-                                width=68,
-                                height=2,
+                                width=68, height=2,
                                 command=self.btn_start_callback)
         self.btn_start.grid(row=3, column=1, pady=5, columnspan=2)
 
@@ -86,6 +85,13 @@ class KsmPixelPlotterGUI(Frame):
                                          width=60,
                                          height=15)
         self.txt_image_processing.grid(row=4, column=1, columnspan=2, pady=5)
+
+        # Close button.
+        self.btn_close = Button(self.master,
+                                text='Close',
+                                width=10, height=1,
+                                command=self.btn_close_callback)
+        self.btn_close.grid(row=5, column=1, pady=5, sticky=N)
 
     def show_settings_window(self):
         """Create and open settings window."""
@@ -164,6 +170,10 @@ class KsmPixelPlotterGUI(Frame):
             # Plot pixel_data to file.
             self.plot_pixel_data_to_file(image_file, img.size[0],
                                          img.size[1], pixel_data)
+
+    def btn_close_callback(self):
+        """Close application."""
+        self.master.destroy()
 
     def plot_pixel_data_to_file(self, file_path, size_x, size_y, pixel_data):
         """Plot pixeldata to file ('XX' = black, '  ' = white pixel)."""
