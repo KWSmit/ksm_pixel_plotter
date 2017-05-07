@@ -85,7 +85,7 @@ def goto_stop():
     """Move to start position."""
     while not ts_stop.value():
         x_motor.run_forever(speed_sp=-800)
-        x_motor.stop(stop_action='hold')
+    x_motor.stop(stop_action='hold')
 
 def plot_file(pp_settings, size_x, size_y, pixel_data):
     """Plot the imagefile."""
