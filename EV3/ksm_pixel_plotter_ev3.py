@@ -84,7 +84,7 @@ def pen_down(pp_settings):
 def goto_stop():
     """Move to start position."""
     while not ts_stop.value():
-        x_motor.run_forever(speed_sp=-800)
+        x_motor.run_forever(speed_sp=-300)
     x_motor.stop(stop_action='hold')
 
 def plot_file(pp_settings, size_x, size_y, pixel_data):
@@ -98,10 +98,12 @@ def plot_file(pp_settings, size_x, size_y, pixel_data):
         for x in range(size_x):
             if pixel_data[x, y] == 0:
                 pen_down(pp_settings)
+                sleep(0.1)
                 pen_up(pp_settings)
                 sleep(0.1)
                 step_x(pp_settings, 1)
             else:
+                sleep(0.1)
                 step_x(pp_settings, 1)
         goto_stop()
         step_y(pp_settings, -1)
